@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Strict mode for better error handling
-set -euo pipefail
+# set -euo pipefail
 
 # https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
 # Unit testing https://github.com/bats-core/bats-core
@@ -210,7 +210,7 @@ get_latest_commits_list() {
         log "$commit"
     done
 
-    if [ "${commits_array[*]}" -eq 0 ]; then
+    if [ "${commits_array[@]}" -eq 0 ]; then
         log "Warning: No commits found since last tag"
     fi
     #
