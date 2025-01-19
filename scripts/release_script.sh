@@ -191,30 +191,38 @@ get_latest_commits_list() {
     # NOTE: You should get latest commits since the latest tag
     # TODO: Handle if there is no previous tag
 
-    local commits_array=()
+    # Declare an empty array
+    declare -a commits_array
+
+    # https://claude.ai/chat/d5b6319c-379e-46a8-bd4d-67e84993e34a
     # Format <commit_hash> <subject> <body>
-    local git_format="%h,%s,%b"
+    local git_format="%h,%s,%b%x00" # Use null byte as separator
 
     if [ -n "$latest_tag" ]; then
-        while IFS= read -r commit; do
+        log "latest_tag = $latest_tag"
+        
+        while IFS= read -r -d $'\0' commit; do
+
+            log "commit = $commit"
             # Push one item to commits_array
             commits_array+=("$commit")
             # Capturing the output of git log since the latest tag
             # and feed the output to the while loop
-        done < <(git log "v$latest_tag"..HEAD --pretty=format:"$git_format")
+        done < <(git log "v${latest_tag}"..HEAD --pretty=format:"${git_format}")
     else
         # If no tags exist, get all commits
         log "No tags exist!"
         while IFS= read -r commit; do
             commits_array+=("$commit")
-        done < <(git log --pretty=format:"$git_format")
+        done < <(git log --pretty=format:"${git_format}")
+        log "commits_array = ${commits_array[*]}"
     fi
 
     # Log all commits for debugging
     log "Found ${#commits_array[@]} commits since ${latest_tag:-(repository start)}"
-    
+
     for commit in "${commits_array[@]}"; do
-        echo "$commit"
+        log "$commit"
     done
 
     if [ ${#commits_array[@]} -eq 0 ]; then
