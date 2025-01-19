@@ -163,13 +163,12 @@ check_git_tags() {
         is_first_release=true
         latest_tag=""
     else
-        log "Tags detected in the $REPOSITORY_NAME"
-        is_first_release=false
-
         # Get the most recent tag and remove "v" prefix
         # `git describe --abbrev=0` gets the most recent tag
         # sed removes the "v" prefix from the version number
-        latest_tag=$(git describe --abbrev=0 2>/dev/null | sed 's/^v//')
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+        log "Tags detected in the $REPOSITORY_NAME"
+        is_first_release=false
 
         if [ -n "$latest_tag" ]; then
             log "Latest tag found v$latest_tag"
@@ -205,15 +204,17 @@ get_latest_commits_list() {
         done < <(git log "v$latest_tag"..HEAD --pretty=format:"$git_format")
     else
         # If no tags exist, get all commits
+        log "No tags exist!"
         while IFS= read -r commit; do
             commits_array+=("$commit")
         done < <(git log --pretty=format:"$git_format")
     fi
 
     # Log all commits for debugging
-    log "Found ${commits_array[*]} commits since ${latest_tag:-(repository start)}"
+    log "Found ${#commits_array[@]} commits since ${latest_tag:-(repository start)}"
+    
     for commit in "${commits_array[@]}"; do
-        log "$commit"
+        echo "$commit"
     done
 
     if [ ${#commits_array[@]} -eq 0 ]; then
@@ -222,7 +223,7 @@ get_latest_commits_list() {
     #
 
     # Return the array
-    echo "${commits_array[@]}"
+    printf "%s\n" "${commits_array[@]}"
 }
 
 # Parse a single commit into its components
@@ -369,7 +370,7 @@ process_commit() {
 
 # Parse a tag into major, minor, and patch versions
 parse_latest_commits() {
-    log "===== Parse commits ======"
+    log "===== Parse latest commits ======"
 
     # Fetch latest commits
     local commits_array

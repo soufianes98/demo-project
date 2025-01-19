@@ -93,7 +93,7 @@ jobs:
         run: |
           export REPOSITORY_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           chmod +x scripts/release_script.sh
-          scripts/release_script.sh
+          bash scripts/release_script.sh
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
